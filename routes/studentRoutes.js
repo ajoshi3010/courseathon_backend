@@ -63,7 +63,7 @@ router.get('/courses',  async (req, res) => {
 // View Enrolled Courses with Modules
 router.get('/enrolled-courses',  async (req, res) => {
   try {
-    const studentId = req.user.userId;
+    const studentId = req.body.userId;
     const courses = await Course.find({ enrolledStudents: studentId }).populate('modules', 'title');
     res.status(200).json(courses);
   } catch (error) {
@@ -76,7 +76,7 @@ router.get('/enrolled-courses',  async (req, res) => {
 router.get('/courses/:courseId/modules',  async (req, res) => {
   try {
     const courseId = req.params.courseId;
-    const studentId = req.user.userId;
+    const studentId = req.body.userId;
     
     const course = await Course.findOne({ _id: courseId, enrolledStudents: studentId }).populate('modules');
     if (!course) {
@@ -93,7 +93,7 @@ router.get('/courses/:courseId/modules',  async (req, res) => {
 router.delete('/courses/:courseId/unenroll',  async (req, res) => {
   try {
     const courseId = req.params.courseId;
-    const studentId = req.user.userId;
+    const studentId = req.body.userId;
     
     const course = await Course.findById(courseId);
     if (!course) {
