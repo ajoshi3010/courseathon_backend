@@ -1,11 +1,18 @@
-# Ignore node_modules directory
+# Dependency directories
 node_modules/
 
-# Ignore .env files
+# Environment variables
 .env
 
-# Ignore any log files
-*.log
-
-# Ignore macOS system files
+# macOS system files
 .DS_Store
+
+# Log files
+*.log
+npm-debug.log*
+
+# Ignore the .idea directory if you're using WebStorm
+.idea/
+
+# Ignore the .vscode directory if you're using Visual Studio Code
+.vscode/
