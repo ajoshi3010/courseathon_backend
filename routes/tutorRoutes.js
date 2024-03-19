@@ -156,7 +156,7 @@ router.delete('/courses/:courseId/modules/:moduleId', async (req, res) => {
       }
   
       // Populate enrolled students
-      await course.populate('enrolledStudents').execPopulate();
+      await course.populate('enrolledStudents')
   
       res.status(200).json({ students: course.enrolledStudents });
     } catch (error) {

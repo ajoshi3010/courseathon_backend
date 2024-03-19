@@ -14,7 +14,7 @@ router.post('/user-id', async (req, res) => {
       // Check if userId already exists
       const existingStudent = await Student.findOne({ userId });
       if (existingStudent) {
-        return res.status(400).json({ message: 'Student user ID already exists' });
+        return res.status(200).json({ message: 'student already exists', tutor: existingStudent });
       }
   
       // Create new student with user ID
@@ -31,7 +31,7 @@ router.post('/user-id', async (req, res) => {
 router.post('/courses/:courseId/enroll',  async (req, res) => {
   try {
     const courseId = req.params.courseId;
-    const studentId = req.user.userId;
+    const studentId = req.body.userId;
     
     const course = await Course.findById(courseId);
     if (!course) {
