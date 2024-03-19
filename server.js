@@ -23,11 +23,12 @@ const tutorRoutes = require('./routes/tutorRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const moduleRoutes = require('./routes/moduleRoutes');
-
+const authRoutes = require('./routes/authRoutes');
 app.use('/tutors', tutorRoutes);
 app.use('/students', studentRoutes);
 app.use('/courses', courseRoutes);
 app.use('/modules', moduleRoutes);
+app.use('/auth', authRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
