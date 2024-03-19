@@ -34,7 +34,7 @@ router.post('/:tutorId/courses', async (req, res) => {
   // Add Module to Course Route
   router.post('/:tutorId/courses/:courseId/modules', async (req, res) => {
     try {
-      const { title, videoLink, meetingLink, meetingDate } = req.body;
+      const { title, link, meetingDate } = req.body;
       const { tutorId, courseId } = req.params;
   
       // Check if tutor exists
@@ -50,7 +50,7 @@ router.post('/:tutorId/courses', async (req, res) => {
       }
   
       // Create new module
-      const newModule = new Module({ title, videoLink, meetingLink, meetingDate });
+      const newModule = new Module({ title, link, meetingDate });
       await newModule.save();
   
       // Add module to course
@@ -141,5 +141,69 @@ router.delete('/courses/:courseId/modules/:moduleId', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   });
-  
+  // Delete Course and Related Modules
+router.delete('/courses/:courseId', async (req, res) => {
+    try {
+        const courseId = req.params.courseId;
+
+        // Delete the course
+        await Course.findByIdAndDelete(courseId);
+
+        // Delete related modules
+        await Module.deleteMany({ courseId });
+
+        res.status(200).json({ message: 'Course and related modules deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// View Course Contents Route
+router.get('/courses/:courseId/contents', async (req, res) => {
+    try {
+        const courseId = req.params.courseId;
+
+        // Find the course by courseId
+        const course = await Course.findById(courseId).populate('modules');
+
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        res.status(200).json({ course });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+// Update Module Route
+router.put('/modules/:moduleId', async (req, res) => {
+    try {
+        const moduleId = req.params.moduleId;
+        const { title, videoLink, meetingLink, meetingDate, isLive } = req.body;
+
+        // Find the module by moduleId
+        let module = await Module.findById(moduleId);
+
+        if (!module) {
+            return res.status(404).json({ message: 'Module not found' });
+        }
+
+        // Update module fields
+        module.title = title;
+        module.videoLink = videoLink;
+        module.meetingLink = meetingLink;
+        module.meetingDate = meetingDate;
+        module.isLive = isLive;
+
+        // Save the updated module
+        module = await module.save();
+
+        res.status(200).json({ message: 'Module updated successfully', module });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
   module.exports = router;
