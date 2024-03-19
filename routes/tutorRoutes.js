@@ -80,7 +80,58 @@ router.post('/:tutorId/courses', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   });
-  
+
+  // View Courses Added by the Tutor
+router.get('/courses', async (req, res) => {
+  try {
+    const tutorId = req.user._id; // Assuming tutor ID is available in the request (you'll need to implement authentication)
+    const courses = await Course.find({ tutor: tutorId });
+    res.status(200).json(courses);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update Course Content
+router.put('/courses/:courseId', async (req, res) => {
+    try {
+      const courseId = req.params.courseId;
+      const { title, description } = req.body;
+      
+      const course = await Course.findByIdAndUpdate(courseId, { title, description }, { new: true });
+      if (!course) {
+        return res.status(404).json({ message: 'Course not found' });
+      }
+      res.status(200).json({ message: 'Course updated successfully', course });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+  // Delete Module
+router.delete('/courses/:courseId/modules/:moduleId', async (req, res) => {
+    try {
+      const courseId = req.params.courseId;
+      const moduleId = req.params.moduleId;
+      
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).json({ message: 'Course not found' });
+      }
+      const moduleIndex = course.modules.indexOf(moduleId);
+      if (moduleIndex === -1) {
+        return res.status(404).json({ message: 'Module not found in course' });
+      }
+      course.modules.splice(moduleIndex, 1);
+      await course.save();
+      await Module.findByIdAndDelete(moduleId);
+      res.status(200).json({ message: 'Module deleted successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
   // Get Students Enrolled in Course Route
   router.get('/:tutorId/courses/:courseId/students', async (req, res) => {
     try {
