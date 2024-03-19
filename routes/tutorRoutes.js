@@ -15,7 +15,7 @@ router.post('/user-id', async (req, res) => {
       // Check if userId already exists
       const existingTutor = await Tutor.findOne({ userId });
       if (existingTutor) {
-        return res.status(400).json({ message: 'Tutor user ID already exists' });
+        return res.status(200).json({ message: 'tutor already exists', tutor: existingTutor });
       }
   
       // Create new tutor with user ID
@@ -56,11 +56,11 @@ router.post('/:tutorId/courses', async (req, res) => {
   // Add Module to Course Route
   router.post('/:tutorId/courses/:courseId/modules', async (req, res) => {
     try {
-      const { title, link, meetingDate } = req.body;
+    //   const { title, link, meetingDate,uploadedDate,isLive } = req.body;
       const { tutorId, courseId } = req.params;
   
       // Check if tutor exists
-      const tutor = await Tutor.findById(tutorId);
+      const tutor = await Tutor.findOne({ userId: tutorId });
       if (!tutor) {
         return res.status(404).json({ message: 'Tutor not found' });
       }
@@ -72,7 +72,7 @@ router.post('/:tutorId/courses', async (req, res) => {
       }
   
       // Create new module
-      const newModule = new Module({ title, link, meetingDate });
+      const newModule = new Module(req.body);
       await newModule.save();
   
       // Add module to course
@@ -87,16 +87,17 @@ router.post('/:tutorId/courses', async (req, res) => {
   });
 
   // View Courses Added by the Tutor
-router.get('/courses', async (req, res) => {
-  try {
-    const tutorId = req.user._id; // Assuming tutor ID is available in the request (you'll need to implement authentication)
-    const courses = await Course.find({ tutor: tutorId });
-    res.status(200).json(courses);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
+  router.get('/courses', async (req, res) => {
+    try {
+      const { tutorId } = req.body; // Assuming tutor ID is sent in the request body
+      const courses = await Course.find({ tutor: tutorId });
+      res.status(200).json(courses);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+  
 
 // Update Course Content
 router.put('/courses/:courseId', async (req, res) => {
