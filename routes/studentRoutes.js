@@ -2,27 +2,12 @@
 
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken'); // Import JWT library
 const Student = require('../models/Student');
 const Course = require('../models/Course');
 
-// Middleware function to authenticate JWT tokens
-const authenticateJWT = (req, res, next) => {
-  const token = req.headers.authorization;
-  if (!token) {
-    return res.status(401).json({ message: 'Authorization token is required' });
-  }
-  jwt.verify(token, 'your-secret-key', (err, decoded) => { // Replace 'your-secret-key' with your actual secret key
-    if (err) {
-      return res.status(401).json({ message: 'Invalid or expired token' });
-    }
-    req.user = decoded; // Set user information from decoded token
-    next();
-  });
-};
 
 // Enroll to a Course
-router.post('/courses/:courseId/enroll', authenticateJWT, async (req, res) => {
+router.post('/courses/:courseId/enroll',  async (req, res) => {
   try {
     const courseId = req.params.courseId;
     const studentId = req.user.userId;
@@ -44,7 +29,7 @@ router.post('/courses/:courseId/enroll', authenticateJWT, async (req, res) => {
 });
 
 // View All Course Details (excluding modules)
-router.get('/courses', authenticateJWT, async (req, res) => {
+router.get('/courses',  async (req, res) => {
   try {
     const courses = await Course.find().select('-modules');
     res.status(200).json(courses);
@@ -55,7 +40,7 @@ router.get('/courses', authenticateJWT, async (req, res) => {
 });
 
 // View Enrolled Courses with Modules
-router.get('/enrolled-courses', authenticateJWT, async (req, res) => {
+router.get('/enrolled-courses',  async (req, res) => {
   try {
     const studentId = req.user.userId;
     const courses = await Course.find({ enrolledStudents: studentId }).populate('modules', 'title');
@@ -67,7 +52,7 @@ router.get('/enrolled-courses', authenticateJWT, async (req, res) => {
 });
 
 // View Course Modules (if enrolled)
-router.get('/courses/:courseId/modules', authenticateJWT, async (req, res) => {
+router.get('/courses/:courseId/modules',  async (req, res) => {
   try {
     const courseId = req.params.courseId;
     const studentId = req.user.userId;
@@ -84,7 +69,7 @@ router.get('/courses/:courseId/modules', authenticateJWT, async (req, res) => {
 });
 
 // Unenroll from a Course
-router.delete('/courses/:courseId/unenroll', authenticateJWT, async (req, res) => {
+router.delete('/courses/:courseId/unenroll',  async (req, res) => {
   try {
     const courseId = req.params.courseId;
     const studentId = req.user.userId;
