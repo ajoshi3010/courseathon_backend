@@ -7,7 +7,27 @@ const Course = require('../models/Course');
 const Module = require('../models/Module');
 
 
-
+// Route to post tutor user ID
+router.post('/user-id', async (req, res) => {
+    try {
+      const { userId } = req.body;
+  
+      // Check if userId already exists
+      const existingTutor = await Tutor.findOne({ userId });
+      if (existingTutor) {
+        return res.status(400).json({ message: 'Tutor user ID already exists' });
+      }
+  
+      // Create new tutor with user ID
+      const newTutor = new Tutor({ userId });
+      await newTutor.save();
+  
+      res.status(201).json({ message: 'Tutor user ID posted successfully', tutor: newTutor });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 // Add Course Route
 router.post('/:tutorId/courses', async (req, res) => {
     try {

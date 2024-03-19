@@ -6,6 +6,27 @@ const Student = require('../models/Student');
 const Course = require('../models/Course');
 
 
+// Route to post student user ID
+router.post('/user-id', async (req, res) => {
+    try {
+      const { userId } = req.body;
+  
+      // Check if userId already exists
+      const existingStudent = await Student.findOne({ userId });
+      if (existingStudent) {
+        return res.status(400).json({ message: 'Student user ID already exists' });
+      }
+  
+      // Create new student with user ID
+      const newStudent = new Student({ userId });
+      await newStudent.save();
+  
+      res.status(201).json({ message: 'Student user ID posted successfully', student: newStudent });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 // Enroll to a Course
 router.post('/courses/:courseId/enroll',  async (req, res) => {
   try {

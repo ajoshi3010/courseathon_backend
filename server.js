@@ -11,10 +11,9 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/tutoring_platform', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect('mongodb+srv://careerretry123:careerretry1234@cluster0.182dkb4.mongodb.net/').then(
+    console.log("mongo connected")
+)
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
