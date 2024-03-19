@@ -35,13 +35,13 @@ router.post('/:tutorId/courses', async (req, res) => {
       const tutorId = req.params.tutorId;
   
       // Check if tutor exists
-      const tutor = await Tutor.findById(tutorId);
+      const tutor = await Tutor.findOne({ userId: tutorId });
       if (!tutor) {
         return res.status(404).json({ message: 'Tutor not found' });
       }
   
       // Create new course
-      const newCourse = new Course({ title, description, tutor: tutorId });
+      const newCourse = new Course({ title, description, tutor: tutor._id }); // Use tutor._id instead of tutor
       await newCourse.save();
   
       res.status(201).json({ message: 'Course added successfully', course: newCourse });
@@ -50,6 +50,8 @@ router.post('/:tutorId/courses', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   });
+  
+  
   
   // Add Module to Course Route
   router.post('/:tutorId/courses/:courseId/modules', async (req, res) => {
