@@ -122,9 +122,9 @@ router.get('/courses',  async (req, res) => {
 });
 
 // View Enrolled Courses with Modules
-router.get('/enrolled-courses',  async (req, res) => {
+router.get('/enrolled-courses/:userId',  async (req, res) => {
   try {
-    const studentId = req.body.userId;
+    const studentId = req.params.userId;
     const courses = await Course.find({ enrolledStudents: studentId }).populate('modules', 'title');
     res.status(200).json(courses);
   } catch (error) {
@@ -134,10 +134,10 @@ router.get('/enrolled-courses',  async (req, res) => {
 });
 
 // View Course Modules (if enrolled)
-router.get('/courses/:courseId/modules',  async (req, res) => {
+router.get('/courses/:courseId/modules/:userId',  async (req, res) => {
   try {
     const courseId = req.params.courseId;
-    const studentId = req.body.userId;
+    const studentId = req.params.userId;
     
     const course = await Course.findOne({ _id: courseId, enrolledStudents: studentId }).populate('modules');
     if (!course) {
