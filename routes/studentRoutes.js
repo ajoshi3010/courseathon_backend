@@ -72,6 +72,21 @@ router.get('/courses/:tutorId', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+// Route to check if a student is enrolled in a course
+router.get('/:studentId/isEnrolled/:courseId', async (req, res) => {
+  try {
+      const { studentId, courseId } = req.params;
+
+      // Query to check if the student is enrolled in the course
+      const isEnrolled = await Course.findOne({ _id: courseId, enrolledStudents: studentId });
+
+      // Send response based on whether the student is enrolled or not
+      res.json({ isEnrolled: !!isEnrolled });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
 // Enroll to a Course
 router.post('/courses/:courseId/enroll',  async (req, res) => {
   try {
