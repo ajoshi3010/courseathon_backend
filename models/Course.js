@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 const courseSchema = new Schema({
   title: String,
   description: String,
+  imageUrl:String,
   tutor: { type: Schema.Types.ObjectId, ref: 'Tutor' },
   modules: [{ type: Schema.Types.ObjectId, ref: 'Module' }],
   enrolledStudents: [{ type: Schema.Types.ObjectId, ref: 'Student' }], // New field for enrolled students

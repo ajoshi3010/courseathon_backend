@@ -83,7 +83,7 @@ router.put('/:tutorId/name', async (req, res) => {
       return res.status(404).json({ message: 'Tutor not found' });
     }
     
-    // Update the tutor's image link
+    // Update the tutor's name
     tutor.name = name;
     await tutor.save();
     
@@ -150,7 +150,28 @@ router.post('/:tutorId/courses', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   });
+// Update Course Image URL
+router.put('/courses/:courseId/image', async (req, res) => {
+  try {
+      const courseId = req.params.courseId;
+      const { imageUrl } = req.body;
 
+      // Check if course exists
+      const course = await Course.findById(courseId);
+      if (!course) {
+          return res.status(404).json({ message: 'Course not found' });
+      }
+
+      // Update image URL
+      course.imageUrl = imageUrl;
+      await course.save();
+
+      res.status(200).json({ message: 'Course image URL updated successfully', course });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
   // View Courses Added by the Tutor
   router.get('/courses', async (req, res) => {
     try {
