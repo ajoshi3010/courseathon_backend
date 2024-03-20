@@ -6,7 +6,6 @@ const Tutor = require('../models/Tutor');
 const Course = require('../models/Course');
 const Module = require('../models/Module');
 
-
 // Route to post tutor user ID
 router.post('/user-id', async (req, res) => {
     try {
@@ -28,6 +27,28 @@ router.post('/user-id', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   });
+  // Update Tutor's About Me
+router.put('/:tutorId/aboutme', async (req, res) => {
+  try {
+    const tutorId = req.params.tutorId;
+    const { aboutMe } = req.body;
+    
+    // Find the tutor by ID
+    const tutor = await Tutor.findOne({ userId: tutorId });
+    if (!tutor) {
+      return res.status(404).json({ message: 'Tutor not found' });
+    }
+    
+    // Update the tutor's about me
+    tutor.aboutMe = aboutMe;
+    await tutor.save();
+    
+    res.status(200).json({ message: 'About Me updated successfully', tutor });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 // Add Course Route
 router.post('/:tutorId/courses', async (req, res) => {
     try {

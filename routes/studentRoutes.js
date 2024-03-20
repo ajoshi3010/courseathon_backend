@@ -27,6 +27,28 @@ router.post('/user-id', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   });
+  
+  // Display all tutors
+  router.get('/tutors', async (req, res) => {
+    try {
+      const tutors = await Tutor.find();
+      res.status(200).json(tutors);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+  // View All Course Details (excluding modules) of a particular tutor
+router.get('/courses/:tutorId', async (req, res) => {
+  try {
+    const tutorId = req.params.tutorId;
+    const courses = await Course.find({ tutor: tutorId }).select('-modules');
+    res.status(200).json(courses);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 // Enroll to a Course
 router.post('/courses/:courseId/enroll',  async (req, res) => {
   try {

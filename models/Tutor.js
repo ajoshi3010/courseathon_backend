@@ -10,6 +10,7 @@ const tutorSchema = new Schema({
     unique: true
   },
   name: String,
+  aboutMe:String
   // Add more fields as needed
 });
 
