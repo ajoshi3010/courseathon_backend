@@ -138,4 +138,26 @@ router.delete('/courses/:courseId/unenroll',  async (req, res) => {
   }
 });
 
+// Check Enrollment Status
+router.get('/:studentId/isEnrolled/:courseId', async (req, res) => {
+  try {
+      const { studentId, courseId } = req.params;
+
+      // Check if the course exists
+      const course = await Course.findById(courseId);
+      if (!course) {
+          return res.status(404).json({ message: 'Course not found' });
+      }
+
+      // Check if the student is enrolled in the course
+      const isEnrolled = course.enrolledStudents.includes(studentId);
+      
+      // Return the enrollment status
+      res.status(200).json({ isEnrolled: isEnrolled });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 module.exports = router;
