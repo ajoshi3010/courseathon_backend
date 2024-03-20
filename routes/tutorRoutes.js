@@ -176,7 +176,11 @@ router.put('/courses/:courseId/image', async (req, res) => {
 router.get('/courses/:tutorId', async (req, res) => {
   try {
     const { tutorId } = req.params; // Assuming tutor ID is sent in the request body
-    const courses = await Course.find({ tutor: tutorId });
+    const tutor = await Tutor.findById(tutorId);
+    if (!tutor) {
+      return res.status(404).json({ message: 'Tutor not found' });
+    }
+    const courses = await Course.find({ tutor});
     res.status(200).json(courses);
   } catch (error) {
     console.error(error);
