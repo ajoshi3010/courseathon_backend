@@ -28,6 +28,28 @@ router.post('/user-id', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   });
+  // Update Student's Name
+router.put('/:studentId/name', async (req, res) => {
+  try {
+    const studentId = req.params.studentId;
+    const { name } = req.body;
+    
+    // Find the tutor by ID
+    const student = await Tutor.findOne({ userId: studentId });
+    if (!student) {
+      return res.status(404).json({ message: 'Tutor not found' });
+    }
+    
+    // Update the tutor's name
+    student.name = name;
+    await student.save();
+    
+    res.status(200).json({ message: 'About Me updated successfully', student });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
   
   // Display all tutors
   router.get('/tutors', async (req, res) => {
