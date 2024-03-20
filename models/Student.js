@@ -4,7 +4,11 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const studentSchema = new Schema({
-  _id:String,
+  userId: {
+    type: String,
+    required: true,
+    unique: true
+  },
   name: String,
   // Add more fields as needed
 });

@@ -10,17 +10,16 @@ const Tutor = require('../models/Tutor');
 // Route to post student user ID
 router.post('/user-id', async (req, res) => {
     try {
-      const { _id} = req.body;
-
-      
+      const { userId } = req.body;
+  
       // Check if userId already exists
-      const existingStudent = await Student.findById(_id);
+      const existingStudent = await Student.findOne({ userId });
       if (existingStudent) {
-        return res.status(200).json({ message: 'student already exists', student: existingStudent });
+        return res.status(200).json({ message: 'student already exists', tutor: existingStudent });
       }
   
       // Create new student with user ID
-      const newStudent = new Student({_id});
+      const newStudent = new Student({ userId });
       await newStudent.save();
   
       res.status(201).json({ message: 'Student user ID posted successfully', student: newStudent });
@@ -29,28 +28,6 @@ router.post('/user-id', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   });
-  // Update Student's Name
-router.put('/:studentId/name', async (req, res) => {
-  try {
-    const _id = req.params.studentId;
-    const { name } = req.body;
-    
-    // Find the student by ID
-    const student = await Student.findById(_id);
-    if (!student) {
-      return res.status(404).json({ message: 'Student not found' });
-    }
-    
-    // Update the tutor's name
-    student.name = name;
-    await student.save();
-    
-    res.status(200).json({ message: 'About Me updated successfully', student });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
   
   // Display all tutors
   router.get('/tutors', async (req, res) => {
@@ -65,50 +42,37 @@ router.put('/:studentId/name', async (req, res) => {
   // View All Course Details (excluding modules) of a particular tutor
 router.get('/courses/:tutorId', async (req, res) => {
   try {
-    const _id = req.params.tutorId;
-    const courses = await Course.find({ _id: _id }).select('-modules');
+    const tutorId = req.params.tutorId;
+    const courses = await Course.find({ tutor: tutorId }).select('-modules');
     res.status(200).json(courses);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-// Route to check if a student is enrolled in a course
-router.get('/:studentId/isEnrolled/:courseId', async (req, res) => {
+// Enroll to a Course
+router.post('/enroll', async (req, res) => {
   try {
-      const { studentId, courseId } = req.params;
+    const { courseId, userId } = req.body;
 
-      // Query to check if the student is enrolled in the course
-      const isEnrolled = await Course.findOne({ _id: courseId, enrolledStudents: studentId });
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
 
-      // Send response based on whether the student is enrolled or not
-      res.json({ isEnrolled: !!isEnrolled });
+    if (course.enrolledStudents.includes(userId)) {
+      return res.status(400).json({ message: 'Student already enrolled in the course' });
+    }
+
+    course.enrolledStudents.push(userId);
+    await course.save();
+
+    res.status(200).json({ message: 'Student enrolled successfully' });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error' });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
-  // Enroll to a Course
-  router.post('/courses/:courseId/enroll',  async (req, res) => {
-    try {
-      const courseId = req.params.courseId;
-      const studentId = req.body.userId;
-      
-      const course = await Course.findById(courseId);
-      if (!course) {
-        return res.status(404).json({ message: 'Course not found' });
-      }
-      if (course.enrolledStudents.includes(studentId)) {
-        return res.status(400).json({ message: 'Student already enrolled in the course' });
-      }
-      course.enrolledStudents.push(studentId);
-      await course.save();
-      res.status(200).json({ message: 'Student enrolled successfully' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  });
 
 // View All Course Details (excluding modules)
 router.get('/courses',  async (req, res) => {
@@ -122,7 +86,7 @@ router.get('/courses',  async (req, res) => {
 });
 
 // View Enrolled Courses with Modules
-router.get('/enrolled-courses/:userId',  async (req, res) => {
+router.get('/enrolled-courses/:userId', async (req, res) => {
   try {
     const studentId = req.params.userId;
     const courses = await Course.find({ enrolledStudents: studentId }).populate('modules', 'title');
@@ -134,7 +98,7 @@ router.get('/enrolled-courses/:userId',  async (req, res) => {
 });
 
 // View Course Modules (if enrolled)
-router.get('/courses/:courseId/modules/:userId',  async (req, res) => {
+router.get('/courses/:courseId/modules/:userId', async (req, res) => {
   try {
     const courseId = req.params.courseId;
     const studentId = req.params.userId;
@@ -149,6 +113,7 @@ router.get('/courses/:courseId/modules/:userId',  async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 // Unenroll from a Course
 router.delete('/courses/:courseId/unenroll',  async (req, res) => {
