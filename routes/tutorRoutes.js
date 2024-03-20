@@ -10,9 +10,9 @@ const Module = require('../models/Module');
 router.post('/user-id', async (req, res) => {
   try {
     const { _id } = req.body;
-
+console.log(_id)
     // Check if userId already exists
-    const existingTutor = await Tutor.findById(_id);
+    const existingTutor = await Tutor.find({_id});
     if (existingTutor) {
       return res.status(200).json({ message: 'tutor already exists', tutor: existingTutor });
     }
