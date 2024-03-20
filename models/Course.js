@@ -1,15 +1,12 @@
-// models/Course.js
-
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const courseSchema = new Schema({
   title: String,
   description: String,
-  imageUrl:String,
-  tutor: { type: Schema.Types.ObjectId, ref: 'Tutor' },
+  tutor: String,
   modules: [{ type: Schema.Types.ObjectId, ref: 'Module' }],
-  enrolledStudents: [{ type: Schema.Types.ObjectId, ref: 'Student' }], // New field for enrolled students
+  enrolledStudents: [{ type: String }] // Array of student user IDs
   // Add more fields as needed
 });
 
