@@ -15,7 +15,7 @@ router.post('/user-id', async (req, res) => {
       // Check if userId already exists
       const existingStudent = await Student.findOne({ userId });
       if (existingStudent) {
-        return res.status(200).json({ message: 'student already exists', tutor: existingStudent });
+        return res.status(200).json({ message: 'student already exists', student: existingStudent });
       }
   
       // Create new student with user ID
@@ -34,10 +34,10 @@ router.put('/:studentId/name', async (req, res) => {
     const studentId = req.params.studentId;
     const { name } = req.body;
     
-    // Find the tutor by ID
-    const student = await Tutor.findOne({ userId: studentId });
+    // Find the student by ID
+    const student = await Student.findOne({ userId: studentId });
     if (!student) {
-      return res.status(404).json({ message: 'Tutor not found' });
+      return res.status(404).json({ message: 'Student not found' });
     }
     
     // Update the tutor's name
@@ -87,27 +87,27 @@ router.get('/:studentId/isEnrolled/:courseId', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
   }
 });
-// Enroll to a Course
-router.post('/courses/:courseId/enroll',  async (req, res) => {
-  try {
-    const courseId = req.params.courseId;
-    const studentId = req.body.userId;
-    
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
+  // Enroll to a Course
+  router.post('/courses/:courseId/enroll',  async (req, res) => {
+    try {
+      const courseId = req.params.courseId;
+      const studentId = req.body.userId;
+      
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).json({ message: 'Course not found' });
+      }
+      if (course.enrolledStudents.includes(studentId)) {
+        return res.status(400).json({ message: 'Student already enrolled in the course' });
+      }
+      course.enrolledStudents.push(studentId);
+      await course.save();
+      res.status(200).json({ message: 'Student enrolled successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
     }
-    if (course.enrolledStudents.includes(studentId)) {
-      return res.status(400).json({ message: 'Student already enrolled in the course' });
-    }
-    course.enrolledStudents.push(studentId);
-    await course.save();
-    res.status(200).json({ message: 'Student enrolled successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
+  });
 
 // View All Course Details (excluding modules)
 router.get('/courses',  async (req, res) => {
