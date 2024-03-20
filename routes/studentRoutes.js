@@ -40,16 +40,28 @@ router.post('/user-id', async (req, res) => {
     }
   });
   // View All Course Details (excluding modules) of a particular tutor
-router.get('/courses/:tutorId', async (req, res) => {
-  try {
-    const tutorId = req.params.tutorId;
-    const courses = await Course.find({ tutor: tutorId }).select('-modules');
-    res.status(200).json(courses);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
+  router.get('/courses/:tutorId/:userId', async (req, res) => {
+    try {
+      const tutorId = req.params.tutorId;
+      const userId = req.params.userId;
+      
+      console.log(userId)
+      // Fetch courses for the specified tutor
+      const courses = await Course.find({ tutor: tutorId });
+      // Check if the current user is enrolled in each course
+      const coursesWithEnrollmentStatus = courses.map(course => {
+        console.log(course)
+        console.log(userId)
+        const isEnrolled = course.enrolledStudents.includes(userId);
+        return { ...course.toObject(), isEnrolled };
+      });
+  
+      res.status(200).json(coursesWithEnrollmentStatus);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 // Enroll to a Course
 router.post('/enroll', async (req, res) => {
   try {
@@ -138,26 +150,6 @@ router.delete('/courses/:courseId/unenroll',  async (req, res) => {
   }
 });
 
-// Check Enrollment Status
-router.get('/:studentId/isEnrolled/:courseId', async (req, res) => {
-  try {
-      const { studentId, courseId } = req.params;
 
-      // Check if the course exists
-      const course = await Course.findById(courseId);
-      if (!course) {
-          return res.status(404).json({ message: 'Course not found' });
-      }
-
-      // Check if the student is enrolled in the course
-      const isEnrolled = course.enrolledStudents.includes(studentId);
-      
-      // Return the enrollment status
-      res.status(200).json({ isEnrolled: isEnrolled });
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error' });
-  }
-});
 
 module.exports = router;
