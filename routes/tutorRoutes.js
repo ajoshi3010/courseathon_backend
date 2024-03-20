@@ -30,11 +30,11 @@ router.post('/user-id', async (req, res) => {
   // Update Tutor's About Me
 router.put('/:tutorId/aboutme', async (req, res) => {
   try {
-    const tutorId = req.params.tutorId;
+    const _id = req.params.tutorId;
     const { aboutMe } = req.body;
     
     // Find the tutor by ID
-    const tutor = await Tutor.findOne({ userId: tutorId });
+    const tutor = await Tutor.findById(_id);
     if (!tutor) {
       return res.status(404).json({ message: 'Tutor not found' });
     }
@@ -173,9 +173,9 @@ router.put('/courses/:courseId/image', async (req, res) => {
   }
 });
   // View Courses Added by the Tutor
-  router.get('/courses', async (req, res) => {
+  router.get('/courses/:tutorId', async (req, res) => {
     try {
-      const { tutorId } = req.body; // Assuming tutor ID is sent in the request body
+      const { tutorId } = req.params; // Assuming tutor ID is sent in the request body
       const courses = await Course.find({ tutor: tutorId });
       res.status(200).json(courses);
     } catch (error) {

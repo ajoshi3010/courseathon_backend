@@ -10,16 +10,17 @@ const Tutor = require('../models/Tutor');
 // Route to post student user ID
 router.post('/user-id', async (req, res) => {
     try {
-      const { userId } = req.body;
-  
+      const { _id} = req.body;
+
+      
       // Check if userId already exists
-      const existingStudent = await Student.findOne({ userId });
+      const existingStudent = await Student.findById(_id);
       if (existingStudent) {
         return res.status(200).json({ message: 'student already exists', student: existingStudent });
       }
   
       // Create new student with user ID
-      const newStudent = new Student({ userId });
+      const newStudent = new Student({_id});
       await newStudent.save();
   
       res.status(201).json({ message: 'Student user ID posted successfully', student: newStudent });
@@ -31,11 +32,11 @@ router.post('/user-id', async (req, res) => {
   // Update Student's Name
 router.put('/:studentId/name', async (req, res) => {
   try {
-    const studentId = req.params.studentId;
+    const _id = req.params.studentId;
     const { name } = req.body;
     
     // Find the student by ID
-    const student = await Student.findOne({ userId: studentId });
+    const student = await Student.findById(_id);
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
@@ -64,8 +65,8 @@ router.put('/:studentId/name', async (req, res) => {
   // View All Course Details (excluding modules) of a particular tutor
 router.get('/courses/:tutorId', async (req, res) => {
   try {
-    const tutorId = req.params.tutorId;
-    const courses = await Course.find({ tutor: tutorId }).select('-modules');
+    const _id = req.params.tutorId;
+    const courses = await Course.find({ _id: _id }).select('-modules');
     res.status(200).json(courses);
   } catch (error) {
     console.error(error);
