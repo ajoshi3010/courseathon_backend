@@ -183,15 +183,32 @@ router.delete('/courses/:courseId/unenroll',  async (req, res) => {
   }
 });
 
-//to get the details of specific module
-router.get("/modules/:moduleId", async (req, res) => {
-  const { moduleId } = req.params;
-  const module = await Module.findById(moduleId);
-  if (!module) {
-    return res.json({ message: "module not found" });
+// to get the details of specific module
+router.get("/modules/:moduleId/:userId", async (req, res) => {
+  try {
+    const { moduleId, userId } = req.params;
+
+    // Find the module
+    const module = await Module.findById(moduleId);
+    if (!module) {
+      return res.status(404).json({ message: "Module not found" });
+    }
+
+    // Check if the student has completed the module
+    const student = await Student.findOne({ userId });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    const isCompleted = student.modulesFinished.includes(moduleId);
+
+    // Return module details along with completion status
+    return res.status(200).json({ module, isCompleted });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
-  return res.json(module);
 });
+
 // Update Finished Modules for a Student
 router.put('/students/:userId/modules/:moduleId', async (req, res) => {
   try {
