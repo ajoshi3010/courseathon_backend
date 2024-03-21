@@ -150,6 +150,15 @@ router.delete('/courses/:courseId/unenroll',  async (req, res) => {
   }
 });
 
+//to get the details of specific module
+router.get("/modules/:moduleId", async (req, res) => {
+  const { moduleId } = req.params;
+  const module = await Module.findById(moduleId);
+  if (!module) {
+    return res.json({ message: "module not found" });
+  }
+  return res.json(module);
+});
 
 
 module.exports = router;
