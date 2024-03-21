@@ -11,4 +11,4 @@ const courseSchema = new Schema({
   // Add more fields as needed
 });
 
-module.exports = mongoose.model('Course', courseSchema);
+module.exports = mongoose.model('Course', courseSchema);
