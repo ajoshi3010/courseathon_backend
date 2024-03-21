@@ -10,7 +10,7 @@ const Tutor = require('../models/Tutor');
 // Route to post student user ID
 router.post('/user-id', async (req, res) => {
     try {
-      const { userId } = req.body;
+      const { userId,name } = req.body;
   
       // Check if userId already exists
       const existingStudent = await Student.findOne({ userId });
@@ -19,7 +19,7 @@ router.post('/user-id', async (req, res) => {
       }
   
       // Create new student with user ID
-      const newStudent = new Student({ userId });
+      const newStudent = new Student({ userId,name });
       await newStudent.save();
   
       res.status(201).json({ message: 'Student user ID posted successfully', student: newStudent });

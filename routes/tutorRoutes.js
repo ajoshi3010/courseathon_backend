@@ -100,7 +100,8 @@ router.post('/:tutorId/courses', async (req, res) => {
       const tutorId = req.params.tutorId;
   
       // Check if tutor exists
-      const tutor = await Tutor.findOne({ userId: tutorId });
+      const tutor = await Tutor.find({tutorId});
+      console.log(tutor);
       if (!tutor) {
         return res.status(404).json({ message: 'Tutor not found' });
       }
@@ -125,7 +126,7 @@ router.post('/:tutorId/courses', async (req, res) => {
       const { tutorId, courseId } = req.params;
   
       // Check if tutor exists
-      const tutor = await Tutor.findOne({ userId: tutorId });
+      const tutor = await Tutor.find({ tutorId });
       if (!tutor) {
         return res.status(404).json({ message: 'Tutor not found' });
       }
@@ -155,7 +156,7 @@ router.put('/courses/:courseId/image', async (req, res) => {
   try {
       const courseId = req.params.courseId;
       const { imageUrl } = req.body;
-
+      console.log(imageUrl);
       // Check if course exists
       const course = await Course.findById(courseId);
       if (!course) {
@@ -163,9 +164,10 @@ router.put('/courses/:courseId/image', async (req, res) => {
       }
 
       // Update image URL
-      course.imageUrl = imageUrl;
-      await course.save();
+      course.imageLink = imageUrl;
 
+      await course.save();
+      console.log(course);
       res.status(200).json({ message: 'Course image URL updated successfully', course });
   } catch (error) {
       console.error(error);
@@ -231,7 +233,7 @@ router.get('/:tutorId/courses/:courseId/students', async (req, res) => {
     const { tutorId, courseId } = req.params;
 
     // Check if tutor exists
-    const tutor = await Tutor.find({ userId: tutorId });
+    const tutor = await Tutor.find({ _id: tutorId });
     if (!tutor) {
       return res.status(404).json({ message: 'Tutor not found' });
     }
@@ -297,32 +299,38 @@ router.get('/courses/:courseId/contents', async (req, res) => {
     }
 });
 // Update Module Route
-router.put('/modules/:moduleId', async (req, res) => {
+router.put('/modules/:moduleId/addLink', async (req, res) => {
     try {
         const moduleId = req.params.moduleId;
-        const { title, videoLink, meetingLink, meetingDate, isLive } = req.body;
-
+        const { link } = req.body;
         // Find the module by moduleId
         let module = await Module.findById(moduleId);
-
         if (!module) {
             return res.status(404).json({ message: 'Module not found' });
         }
-
-        // Update module fields
-        module.title = title;
-        module.videoLink = videoLink;
-        module.meetingLink = meetingLink;
-        module.meetingDate = meetingDate;
-        module.isLive = isLive;
-
-        // Save the updated module
+        module.link = link;
         module = await module.save();
-
         res.status(200).json({ message: 'Module updated successfully', module });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
     }
+});
+router.put('/modules/:moduleId/Live', async (req, res) => {
+  try {
+      const moduleId = req.params.moduleId;
+      const { isLive } = req.body;
+      // Find the module by moduleId
+      let module = await Module.findById(moduleId);
+      if (!module) {
+          return res.status(404).json({ message: 'Module not found' });
+      }
+      module.isLive = isLive;
+      module = await module.save();
+      res.status(200).json({ message: 'Module updated successfully', module });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
 });
   module.exports = router;
