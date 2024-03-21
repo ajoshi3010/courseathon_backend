@@ -5,6 +5,7 @@ const courseSchema = new Schema({
   title: String,
   description: String,
   tutor: String,
+  imageLink:String,
   modules: [{ type: Schema.Types.ObjectId, ref: 'Module' }],
   enrolledStudents: [{ type: String }] // Array of student user IDs
   // Add more fields as needed
