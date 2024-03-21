@@ -97,11 +97,20 @@ router.get('/courses',  async (req, res) => {
   }
 });
 
-// View Enrolled Courses with Modules
+// View Enrolled Courses with Modules and Tutor Name
 router.get('/enrolled-courses/:userId', async (req, res) => {
   try {
     const studentId = req.params.userId;
-    const courses = await Course.find({ enrolledStudents: studentId }).populate('modules', 'title');
+    const courses = await Course.find({ enrolledStudents: studentId })
+                                .populate('modules', 'title')
+                                .populate({
+                                  path: 'tutor',
+                                  select: 'name',
+                                  model: 'Tutor',
+                                  ref: 'Tutor',
+                                  localField: 'tutor', // Field in Course schema
+                                  foreignField: 'userId' // Field in Tutor schema
+                                }); // Populate the tutor field with the tutor's name
     res.status(200).json(courses);
   } catch (error) {
     console.error(error);
