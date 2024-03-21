@@ -145,19 +145,40 @@ router.get('/enrolled-courses/:userId', async (req, res) => {
 // View Course Modules (if enrolled)
 router.get('/courses/:courseId/modules/:userId', async (req, res) => {
   try {
-    const courseId = req.params.courseId;
-    const studentId = req.params.userId;
+    const { courseId, userId } = req.params;
     
-    const course = await Course.findOne({ _id: courseId, enrolledStudents: studentId }).populate('modules');
+    // Find the course and populate its modules
+    const course = await Course.findOne({ _id: courseId, enrolledStudents: userId }).populate('modules');
+
     if (!course) {
       return res.status(404).json({ message: 'Course not found or student not enrolled in the course' });
     }
-    res.status(200).json(course.modules);
+
+    // Fetch the student's details
+    const student = await Student.findOne({ userId });
+
+    // Create a map to store completion status for each module
+    const moduleCompletionStatus = new Map();
+
+    // Populate the completion status for each module
+    student.modulesFinished.forEach(moduleId => {
+      moduleCompletionStatus.set(moduleId.toString(), true);
+    });
+
+    // Create a new array to hold module details along with completion status
+    const modulesWithCompletionStatus = course.modules.map(module => {
+      const isCompleted = moduleCompletionStatus.has(module._id.toString());
+      return { ...module.toObject(), isCompleted };
+    });
+
+    // Return the modules with completion status
+    res.status(200).json(modulesWithCompletionStatus);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 
 // Unenroll from a Course
