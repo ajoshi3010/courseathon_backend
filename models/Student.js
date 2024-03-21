@@ -10,6 +10,7 @@ const studentSchema = new Schema({
     unique: true
   },
   name: String,
+  modulesFinished:[{ type: Schema.Types.ObjectId, ref: 'Module' }],
   // Add more fields as needed
 });
 

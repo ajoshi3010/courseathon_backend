@@ -97,10 +97,12 @@ router.get('/courses',  async (req, res) => {
   }
 });
 
-// View Enrolled Courses with Modules and Tutor Name
+// View Enrolled Courses with Modules, Tutor Name, and Student Progress
 router.get('/enrolled-courses/:userId', async (req, res) => {
   try {
     const studentId = req.params.userId;
+    
+    // Retrieve enrolled courses with modules and tutor names
     const courses = await Course.find({ enrolledStudents: studentId })
                                 .populate('modules', 'title')
                                 .populate({
@@ -110,13 +112,35 @@ router.get('/enrolled-courses/:userId', async (req, res) => {
                                   ref: 'Tutor',
                                   localField: 'tutor', // Field in Course schema
                                   foreignField: 'userId' // Field in Tutor schema
-                                }); // Populate the tutor field with the tutor's name
-    res.status(200).json(courses);
+                                });
+
+    // Calculate progress for each enrolled course
+    const coursesWithProgress = await Promise.all(courses.map(async (course) => {
+      // Count the number of completed modules for the student in the course
+      const completedModules = (await Student.findOne({ userId: studentId })).modulesFinished
+                                  .filter(moduleId => course.modules.includes(moduleId)).length;
+      // Calculate the progress
+      const totalModules = course.modules.length;
+      const progress = totalModules > 0 ? (completedModules / totalModules) * 100 : 0;
+      
+      // Create a new object with course details and progress
+      return {
+        _id: course._id,
+        title: course.title,
+        description: course.description,
+        modules: course.modules,
+        tutor: course.tutor,
+        progress // Add progress to the object
+      };
+    }));
+
+    res.status(200).json(coursesWithProgress);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 // View Course Modules (if enrolled)
 router.get('/courses/:courseId/modules/:userId', async (req, res) => {
@@ -167,6 +191,71 @@ router.get("/modules/:moduleId", async (req, res) => {
     return res.json({ message: "module not found" });
   }
   return res.json(module);
+});
+// Update Finished Modules for a Student
+router.put('/students/:userId/modules/:moduleId', async (req, res) => {
+  try {
+    const { userId, moduleId } = req.params;
+
+    // Check if student exists
+    const student = await Student.findOne({ userId });
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Check if module exists
+    const module = await Module.findById(moduleId);
+    if (!module) {
+      return res.status(404).json({ message: 'Module not found' });
+    }
+
+    // Check if module is already finished by the student
+    if (student.modulesFinished.includes(moduleId)) {
+      return res.status(400).json({ message: 'Module already finished by the student' });
+    }
+
+    // Add module to the student's finished modules list
+    student.modulesFinished.push(moduleId);
+    await student.save();
+
+    res.status(200).json({ message: 'Module finished successfully for the student' });
+  } catch (error) {
+    console.error('Error updating finished modules for student:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+// Remove Module from Finished Modules for a Student
+router.delete('/students/:userId/modules/:moduleId', async (req, res) => {
+  try {
+    const { userId, moduleId } = req.params;
+
+    // Check if student exists
+    const student = await Student.findOne({ userId });
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Check if module exists
+    const module = await Module.findById(moduleId);
+    if (!module) {
+      return res.status(404).json({ message: 'Module not found' });
+    }
+
+    // Check if module is in the student's finished modules list
+    const index = student.modulesFinished.indexOf(moduleId);
+    if (index === -1) {
+      return res.status(400).json({ message: 'Module not found in student\'s finished modules list' });
+    }
+
+    // Remove module from student's finished modules list
+    student.modulesFinished.splice(index, 1);
+    await student.save();
+
+    res.status(200).json({ message: 'Module removed successfully from the student\'s finished modules list' });
+  } catch (error) {
+    console.error('Error removing module from finished modules for student:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 
