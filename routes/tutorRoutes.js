@@ -218,7 +218,7 @@ router.get('/:tutorId/profile', async (req, res) => {
   }
 });
 
-module.exports = router;
+
 // Get Students Enrolled in Course Route
 router.get('/:tutorId/courses/:courseId/students', async (req, res) => {
   try {

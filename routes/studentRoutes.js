@@ -128,10 +128,11 @@ router.get('/enrolled-courses/:userId', async (req, res) => {
       return {
         _id: course._id,
         title: course.title,
+        imageLink:course.imageLink,
         description: course.description,
         modules: course.modules,
         tutor: course.tutor,
-        progress // Add progress to the object
+        progress
       };
     }));
 
@@ -154,7 +155,7 @@ router.get('/courses/:courseId/modules/:userId', async (req, res) => {
     if (!course) {
       return res.status(404).json({ message: 'Course not found or student not enrolled in the course' });
     }
-
+  
     // Fetch the student's details
     const student = await Student.findOne({ userId });
 
@@ -172,13 +173,20 @@ router.get('/courses/:courseId/modules/:userId', async (req, res) => {
       return { ...module.toObject(), isCompleted };
     });
 
-    // Return the modules with completion status
-    res.status(200).json(modulesWithCompletionStatus);
+    // Include course information in the response
+    const response = {
+      course: course.toObject(),
+      modules: modulesWithCompletionStatus
+    };
+
+    // Return the response
+    res.status(200).json(response);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 
 
@@ -205,7 +213,6 @@ router.delete('/courses/:courseId/unenroll',  async (req, res) => {
   }
 });
 
-// to get the details of specific module
 router.get("/modules/:moduleId/:userId", async (req, res) => {
   try {
     const { moduleId, userId } = req.params;
@@ -223,7 +230,6 @@ router.get("/modules/:moduleId/:userId", async (req, res) => {
     }
     const isCompleted = student.modulesFinished.includes(moduleId);
 
-    // Return module details along with completion status
     return res.status(200).json({ module, isCompleted });
   } catch (error) {
     console.error(error);
